@@ -2,6 +2,7 @@ import { Search, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/common/PageHeader";
+import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingState } from "@/components/common/LoadingState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,9 @@ export function BuscaPage() {
         <FiltrosBusca filtros={filtros} onChange={setFiltros} />
       </div>
 
+      {!termo.trim() && (
+        <EmptyState icon={Search} title="Digite para buscar" description="Busque por nome, CNS ou CPF para localizar um paciente." />
+      )}
       {buscaQuery.isLoading && <LoadingState rows={5} />}
       {buscaQuery.isError && <ErrorState onRetry={() => buscaQuery.refetch()} />}
       {buscaQuery.data && <ResultadoBusca resultados={buscaQuery.data} />}

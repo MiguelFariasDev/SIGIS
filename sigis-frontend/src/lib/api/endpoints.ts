@@ -5,8 +5,11 @@ export const ENDPOINTS = {
   pessoas: {
     base: "/api/pessoas",
     porId: (id: string) => `/api/pessoas/${id}`,
-    buscar: "/api/pessoas/buscar",
+    /** Rota real é "busca" (não "buscar"); parâmetros aceitos: termo, limit. */
+    buscar: "/api/pessoas/busca",
     linhaDoTempo: (id: string) => `/api/pessoas/${id}/linha-do-tempo`,
+    mesclar: "/api/pessoas/mesclar",
+    solicitarAcesso: (id: string) => `/api/pessoas/${id}/solicitar-acesso`,
     perfilClinico: (id: string) => `/api/pessoas/${id}/perfil-clinico`,
     tratamentosConcomitantes: (id: string) => `/api/pessoas/${id}/tratamentos-concomitantes`,
     tratamentoConcomitante: (id: string, treatmentId: string) =>
@@ -17,54 +20,55 @@ export const ENDPOINTS = {
     dificuldadesAprendizagem: (id: string) => `/api/pessoas/${id}/dificuldades-aprendizagem`,
     consentimentos: (id: string) => `/api/pessoas/${id}/consentimentos`,
     consentimento: (id: string, consentId: string) => `/api/pessoas/${id}/consentimentos/${consentId}`,
-    solicitarAcesso: (id: string) => `/api/pessoas/${id}/solicitar-acesso`,
   },
+  /** Endpoint mínimo adicionado nesta integração — ver UnitsController (backend). */
   unidades: {
     base: "/api/unidades",
-  },
-  profissionais: {
-    base: "/api/profissionais",
+    fila: (unidadeId: string) => `/api/unidades/${unidadeId}/fila`,
   },
   filas: {
-    base: "/api/filas",
-    porUnidade: (unidadeId: string) => `/api/filas/unidade/${unidadeId}`,
-    porId: (id: string) => `/api/filas/${id}`,
-    chamarProximo: (unidadeId: string) => `/api/filas/unidade/${unidadeId}/chamar-proximo`,
+    /** Chama uma entrada de fila específica (não "o próximo da unidade" — a UI escolhe a entrada antes de chamar). */
+    chamar: (queueEntryId: string) => `/api/filas/${queueEntryId}/chamar`,
+    comparecimento: (queueEntryId: string) => `/api/filas/${queueEntryId}/comparecimento`,
   },
   atendimentos: {
     base: "/api/atendimentos",
     porId: (id: string) => `/api/atendimentos/${id}`,
     porPessoa: (pessoaId: string) => `/api/atendimentos/pessoa/${pessoaId}`,
+    comparecimento: (id: string) => `/api/atendimentos/${id}/comparecimento`,
   },
   encaminhamentos: {
     base: "/api/encaminhamentos",
-    porId: (id: string) => `/api/encaminhamentos/${id}`,
-    porPessoa: (pessoaId: string) => `/api/encaminhamentos/pessoa/${pessoaId}`,
     recebidos: "/api/encaminhamentos/recebidos",
+    /** Não existe GET simples por id no backend — "rastreio" já é o get-by-id (mesmo DTO). */
+    porId: (id: string) => `/api/encaminhamentos/${id}/rastreio`,
+    porPessoa: (pessoaId: string) => `/api/encaminhamentos/pessoa/${pessoaId}`,
     enviados: "/api/encaminhamentos/enviados",
     aceitar: (id: string) => `/api/encaminhamentos/${id}/aceitar`,
     recusar: (id: string) => `/api/encaminhamentos/${id}/recusar`,
+    rastreio: (id: string) => `/api/encaminhamentos/${id}/rastreio`,
   },
   duplicidades: {
-    base: "/api/duplicidades",
+    pendentes: "/api/duplicidades/pendentes",
     porId: (id: string) => `/api/duplicidades/${id}`,
     resolver: (id: string) => `/api/duplicidades/${id}/resolver`,
+    falsoPositivo: (id: string) => `/api/duplicidades/${id}/falso-positivo`,
   },
   indicadores: {
-    base: "/api/indicadores",
+    painel: "/api/indicadores/painel",
     filaPorServico: "/api/indicadores/fila-por-servico",
     atendimentosPorDia: "/api/indicadores/atendimentos-por-dia",
     alertasRecentes: "/api/indicadores/alertas-recentes",
   },
   auditoria: {
-    base: "/api/auditoria",
-    exportarCsv: "/api/auditoria/exportar",
+    acessos: "/api/auditoria/acessos",
+    acessosCross: "/api/auditoria/acessos-cross",
+    exportarCsv: "/api/auditoria/export-csv",
+  },
+  consentimentos: {
+    base: "/api/consentimentos",
   },
   legalBasis: {
     base: "/api/legal-basis",
-  },
-  consentimentos: {
-    /** Listagem global (T17 — painel DPO/COORDENADOR), distinta de `pessoas.consentimentos`. */
-    base: "/api/consentimentos",
   },
 } as const;

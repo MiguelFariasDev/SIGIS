@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { Save, UserCheck, UsersRound } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,7 +10,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ComparacaoLadoALado } from "@/features/duplicidades/components/ComparacaoLadoALado";
-import type { DuplicateCandidate, DuplicateFoundResponse } from "@/lib/types/person";
+import type { DuplicateCandidate } from "@/lib/types/person";
 import { ClinicalProfileForm } from "./components/ClinicalProfileForm";
 import { ConsentForm } from "./components/ConsentForm";
 import { DadosBasicosForm } from "./components/DadosBasicosForm";
@@ -21,6 +20,7 @@ import { ResponsavelForm } from "./components/ResponsavelForm";
 import { SchoolDataForm } from "./components/SchoolDataForm";
 import {
   criarPessoa,
+  mesclarPessoas,
   registrarConsentimento,
   salvarComposicaoFamiliar,
   salvarDesenvolvimento,
@@ -33,6 +33,7 @@ const TEM_VALOR = (v: unknown) => v !== undefined && v !== "" && v !== null && v
 export function CadastroPage() {
   const navigate = useNavigate();
   const [candidatoDuplicata, setDuplicateCandidate] = useState<DuplicateCandidate | null>(null);
+  const [pessoaCriadaId, setPessoaCriadaId] = useState<string | null>(null);
 
   const {
     register,
@@ -146,19 +147,29 @@ export function CadastroPage() {
 
       await Promise.all(tarefas);
 
+      // O backend real nunca bloqueia a criação: o cadastro já foi
+      // persistido acima. Se houver candidatos a duplicidade (RN02), o
+      // profissional decide mesclar ou confirmar que são pessoas
+      // diferentes — em ambos os casos o cadastro novo já existe.
+      setPessoaCriadaId(pessoa.id);
+      if (pessoa.candidates.length > 0) {
+        setDuplicateCandidate(pessoa.candidates[0]);
+        return;
+      }
+
       toast.success("Cadastro realizado com sucesso.");
       navigate(`/pacientes/${pessoa.id}`);
     },
-    onError: (error) => {
-      if (isAxiosError<DuplicateFoundResponse>(error) && error.response?.status === 409) {
-        setDuplicateCandidate(error.response.data.candidates[0] ?? null);
-        return;
-      }
+    onError: () => {
       toast.error("Nao foi possivel concluir o cadastro. Tente novamente.");
     },
   });
 
-  function montarRequest(values: CadastroPessoaFormValues, forcar: boolean) {
+  const mesclarMutation = useMutation({
+    mutationFn: ({ sourceId, targetId }: { sourceId: string; targetId: string }) => mesclarPessoas(sourceId, targetId),
+  });
+
+  function montarRequest(values: CadastroPessoaFormValues) {
     return {
       fullName: values.fullName,
       birthDate: values.birthDate,
@@ -191,6 +202,8 @@ export function CadastroPage() {
       attendsTutoring: values.attendsTutoring,
       hasFailedGrade: values.hasFailedGrade,
       disabilityTypes: values.disabilityTypes.length > 0 ? values.disabilityTypes.join(", ") : undefined,
+      // O backend real não tem endpoint de criação de responsável — este
+      // campo do formulário não é enviado (gap documentado).
       guardian: values.guardianName
         ? {
             name: values.guardianName,
@@ -200,12 +213,11 @@ export function CadastroPage() {
           }
         : undefined,
       consentimentoLgpd: values.consentClinical,
-      forceCreateDespiteDuplicate: forcar,
     };
   }
 
   function onSubmit(values: CadastroPessoaFormValues) {
-    criarMutation.mutate(montarRequest(values, false));
+    criarMutation.mutate(montarRequest(values));
   }
 
   return (
@@ -291,7 +303,7 @@ export function CadastroPage() {
                 phone: getValues("phone"),
                 street: getValues("street"),
               }}
-              pessoaB={candidatoDuplicata.person}
+              pessoaB={candidatoDuplicata}
             />
           )}
 
@@ -299,9 +311,13 @@ export function CadastroPage() {
             <Button
               variant="outline"
               onClick={() => {
-                const valores = getValues();
+                // O cadastro novo já existe (o backend nunca bloqueia por
+                // duplicidade) — só dispensamos o aviso e seguimos para ele.
                 setDuplicateCandidate(null);
-                criarMutation.mutate(montarRequest(valores, true));
+                if (pessoaCriadaId) {
+                  toast.success("Cadastro realizado com sucesso.");
+                  navigate(`/pacientes/${pessoaCriadaId}`);
+                }
               }}
             >
               <UsersRound className="size-4" />
@@ -309,8 +325,20 @@ export function CadastroPage() {
             </Button>
             <Button
               className="bg-sus-blue hover:bg-sus-blue-dark"
+              disabled={mesclarMutation.isPending}
               onClick={() => {
-                if (candidatoDuplicata) navigate(`/pacientes/${candidatoDuplicata.person.id}`);
+                if (!pessoaCriadaId || !candidatoDuplicata) return;
+                mesclarMutation.mutate(
+                  { sourceId: pessoaCriadaId, targetId: candidatoDuplicata.id },
+                  {
+                    onSuccess: () => {
+                      toast.success("Cadastros mesclados com sucesso.");
+                      setDuplicateCandidate(null);
+                      navigate(`/pacientes/${candidatoDuplicata.id}`);
+                    },
+                    onError: () => toast.error("Nao foi possivel mesclar os cadastros."),
+                  },
+                );
               }}
             >
               <UserCheck className="size-4" />

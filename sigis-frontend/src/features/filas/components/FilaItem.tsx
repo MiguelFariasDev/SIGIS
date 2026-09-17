@@ -1,9 +1,10 @@
 import { useDraggable } from "@dnd-kit/core";
+import { useQuery } from "@tanstack/react-query";
 import { CheckCircle, Clock, UserX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PriorityBadge } from "@/components/domain/PriorityBadge";
 import { Button } from "@/components/ui/button";
-import { unidadesMock } from "@/lib/mocks/data/unidades.mock";
+import { fetchUnidades } from "@/features/unidades/api";
 import { StatusFila } from "@/lib/types/enums";
 import type { FilaAtendimento } from "@/lib/types/fila";
 import { formatarDistancia, formatarIdade } from "@/lib/utils/formatters";
@@ -24,7 +25,8 @@ export function FilaItem({ item, onAtualizarStatus, mostrarUnidade }: FilaItemPr
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
-  const unidade = mostrarUnidade ? unidadesMock.find((u) => u.id === item.unidadeId) : undefined;
+  const unidadesQuery = useQuery({ queryKey: ["unidades"], queryFn: fetchUnidades, enabled: !!mostrarUnidade });
+  const unidade = mostrarUnidade ? unidadesQuery.data?.find((u) => u.id === item.unidadeId) : undefined;
 
   return (
     <div
@@ -49,7 +51,8 @@ export function FilaItem({ item, onAtualizarStatus, mostrarUnidade }: FilaItemPr
         <PriorityBadge prioridade={item.prioridade} />
       </div>
       <p className="text-xs text-muted-foreground">
-        {formatarIdade(item.personBirthDate)} — {item.especialidade}
+        {item.personBirthDate ? `${formatarIdade(item.personBirthDate)} — ` : ""}
+        {item.especialidade}
         {unidade && ` — ${unidade.sigla}`}
       </p>
       <p className="flex items-center gap-1 text-xs text-muted-foreground/80">

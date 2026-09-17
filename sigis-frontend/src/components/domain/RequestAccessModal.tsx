@@ -35,8 +35,9 @@ interface RequestAccessModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   personId: string;
-  secretariat: Secretariat;
-  onGranted: (secretariat: Secretariat) => void;
+  /** Omitido quando o bloqueio é da linha do tempo inteira (backend real não informa qual secretaria específica) — usa texto genérico. */
+  secretariat?: Secretariat;
+  onGranted: (secretariat: Secretariat | undefined, justificativa: string) => void;
 }
 
 /**
@@ -59,15 +60,12 @@ export function RequestAccessModal({ open, onOpenChange, personId, secretariat, 
   });
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) =>
-      solicitarAcesso(personId, {
-        legalBasisId: values.legalBasisId,
-        purpose: values.purpose,
-        justification: values.justification,
-      }),
-    onSuccess: () => {
+    // legalBasisId/purpose ficam só na UX/auditoria local — o backend real
+    // (`SolicitarAcessoRequest`) só aceita `justificativa`.
+    mutationFn: (values: FormValues) => solicitarAcesso(personId, { justification: values.justification }),
+    onSuccess: (_data, values) => {
       toast.success("Acesso concedido e registrado em auditoria.");
-      onGranted(secretariat);
+      onGranted(secretariat, values.justification);
       reset();
       onOpenChange(false);
     },
@@ -82,7 +80,9 @@ export function RequestAccessModal({ open, onOpenChange, personId, secretariat, 
         <DialogHeader>
           <DialogTitle>Solicitar acesso ao conteudo</DialogTitle>
           <DialogDescription>
-            Este evento pertence a secretaria de {SECRETARIAT_LABEL[secretariat]} e esta fora do seu escopo padrao.
+            {secretariat
+              ? `Este evento pertence a secretaria de ${SECRETARIAT_LABEL[secretariat]} e esta fora do seu escopo padrao.`
+              : "Esta pessoa possui historico em outra secretaria, fora do seu escopo padrao."}{" "}
             O acesso sera registrado em log de auditoria com a base legal e a justificativa informadas (RF12/RF13).
           </DialogDescription>
         </DialogHeader>

@@ -9,7 +9,7 @@ import { LoadingState } from "@/components/common/LoadingState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { unidadesMock } from "@/lib/mocks/data/unidades.mock";
+import { fetchUnidades } from "@/features/unidades/api";
 import { PapelRbac, StatusFila } from "@/lib/types/enums";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -53,7 +53,9 @@ export function FilaPage() {
   const [modoVisualizacao, setModoVisualizacao] = useState<ModoVisualizacao>("prioridade");
 
   const modoRede = podeVerRede && unidadeSelecionada === REDE_INTEIRA;
-  const unidade = unidadesMock.find((u) => u.id === unidadeSelecionada);
+  const unidadesQuery = useQuery({ queryKey: ["unidades"], queryFn: fetchUnidades });
+  const unidades = unidadesQuery.data ?? [];
+  const unidade = unidades.find((u) => u.id === unidadeSelecionada);
 
   const filaQuery = useQuery({
     queryKey: ["filas", modoRede ? "rede" : "unidade", unidadeSelecionada],
@@ -143,7 +145,7 @@ export function FilaPage() {
               </SelectTrigger>
               <SelectContent>
                 {podeVerRede && <SelectItem value={REDE_INTEIRA}>Rede inteira</SelectItem>}
-                {unidadesMock.map((u) => (
+                {unidades.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
                     {u.nome} ({u.sigla})
                   </SelectItem>

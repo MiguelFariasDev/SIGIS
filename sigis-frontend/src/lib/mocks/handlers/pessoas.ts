@@ -10,8 +10,7 @@ function paraResultadoBusca(pessoa: Person): PersonSearchResult {
     id: pessoa.id,
     fullName: pessoa.fullName,
     birthDate: pessoa.birthDate,
-    cns: pessoa.cns,
-    cpf: pessoa.cpf,
+    motherName: pessoa.motherName,
     services: pessoa.services ?? [],
     queueStatus: filaAtiva?.status,
     priority: filaAtiva?.prioridade,
@@ -173,23 +172,17 @@ export const pessoasHandlers = [
   http.post("*/api/pessoas", async ({ request }) => {
     const body = (await request.json()) as CreatePersonRequest;
 
-    if (!body.forceCreateDespiteDuplicate) {
-      const candidatos = buscarCandidatosDuplicidade(body.fullName, body.birthDate);
-      if (candidatos.length > 0) {
-        return HttpResponse.json(
-          {
-            message: "Possivel duplicata encontrada.",
-            candidates: candidatos.map((c) => ({
-              person: c.pessoa,
-              score: c.score,
-            })),
-          },
-          { status: 409 },
-        );
-      }
-    }
+    // O backend real nunca bloqueia a criacao por duplicidade — sempre cria
+    // e, se achar candidatos por nome+data de nascimento, devolve 201 com
+    // `candidates` preenchido (ver comentario em features/pacientes/api.ts).
+    const candidatos = buscarCandidatosDuplicidade(body.fullName, body.birthDate);
 
     const agora = new Date().toISOString();
+    const endereco = body.address
+      ? [body.address.street, body.address.number, body.address.neighborhood, body.address.city]
+          .filter(Boolean)
+          .join(", ") + (body.address.state ? ` - ${body.address.state}` : "")
+      : undefined;
     const novaPessoa: Person = {
       id: gerarId("pessoa"),
       fullName: body.fullName,
@@ -201,7 +194,7 @@ export const pessoasHandlers = [
       raceColor: body.raceColor,
       phone: body.phone,
       email: body.email,
-      address: body.address,
+      address: endereco,
       naturality: body.naturality,
       currentSchool: body.currentSchool,
       grade: body.grade,
@@ -232,6 +225,17 @@ export const pessoasHandlers = [
       });
     }
 
-    return HttpResponse.json(novaPessoa, { status: 201 });
+    return HttpResponse.json(
+      {
+        personId: novaPessoa.id,
+        candidates: candidatos.map((c) => ({
+          id: c.pessoa.id,
+          name: c.pessoa.fullName,
+          birthDate: c.pessoa.birthDate,
+          motherName: c.pessoa.motherName,
+        })),
+      },
+      { status: 201 },
+    );
   }),
 ];

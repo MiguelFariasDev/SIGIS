@@ -66,12 +66,13 @@ export function Sidebar() {
   const duplicidadesQuery = useQuery({
     queryKey: ["duplicidades", "pendentes-count"],
     queryFn: () => fetchDuplicidades(StatusAlertaDuplicidade.PENDENTE),
-    enabled: !!usuario,
+    // `GET /api/duplicidades/pendentes` real é restrito a Coordinator (RF04) — chamar para os demais papéis só gera 403.
+    enabled: !!usuario && usuario.papelRbac === PapelRbac.COORDENADOR,
   });
 
   const recebidosQuery = useQuery({
     queryKey: ["encaminhamentos", "recebidos-count", usuario?.unidadeId],
-    queryFn: () => fetchEncaminhamentosRecebidos(usuario!.unidadeId),
+    queryFn: () => fetchEncaminhamentosRecebidos(),
     enabled: !!usuario && usuario.papelRbac !== PapelRbac.AUDITOR,
   });
 
@@ -104,14 +105,16 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 px-3 pb-3">
         <NavLinkItem item={{ to: "/dashboard", label: "Painel", icon: LayoutDashboard }} />
         <NavLinkItem item={{ to: "/pacientes", label: "Pacientes", icon: Users }} />
-        <NavLinkItem
-          item={{
-            to: "/duplicidades",
-            label: "Duplicidades",
-            icon: AlertTriangle,
-            badge: duplicidadesQuery.data?.length,
-          }}
-        />
+        {usuario?.papelRbac === PapelRbac.COORDENADOR && (
+          <NavLinkItem
+            item={{
+              to: "/duplicidades",
+              label: "Duplicidades",
+              icon: AlertTriangle,
+              badge: duplicidadesQuery.data?.length,
+            }}
+          />
+        )}
 
         <NavGroup label="Encaminhamentos">
           <NavLinkItem

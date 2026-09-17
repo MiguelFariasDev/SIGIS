@@ -48,7 +48,7 @@ export function ResultadoBusca({ resultados }: ResultadoBuscaProps) {
       header: "Servicos",
       render: (row) => (
         <div className="flex flex-wrap gap-1">
-          {row.services.map((servico) => (
+          {(row.services ?? []).map((servico) => (
             <ServiceChip key={servico} sigla={servico} />
           ))}
         </div>

@@ -36,8 +36,22 @@ export const router = createBrowserRouter([
       { path: "pacientes", element: <BuscaPage /> },
       { path: "pacientes/novo", element: <CadastroPage /> },
       { path: "pacientes/:id", element: <PerfilPage /> },
-      { path: "duplicidades", element: <RevisaoPage /> },
-      { path: "duplicidades/:id", element: <DuplicidadeAlertPage /> },
+      {
+        path: "duplicidades",
+        element: (
+          <RequireRole papeis={[PapelRbac.COORDENADOR]}>
+            <RevisaoPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: "duplicidades/:id",
+        element: (
+          <RequireRole papeis={[PapelRbac.COORDENADOR]}>
+            <DuplicidadeAlertPage />
+          </RequireRole>
+        ),
+      },
       { path: "filas", element: <FilaPage /> },
       { path: "filas/:unidadeId", element: <FilaPage /> },
       { path: "atendimentos/:id", element: <AtendimentoPage /> },

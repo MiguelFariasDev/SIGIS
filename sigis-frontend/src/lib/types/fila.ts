@@ -4,7 +4,8 @@ export interface FilaAtendimento {
   id: string;
   personId: string;
   personName: string;
-  personBirthDate: string;
+  /** Não retornado pela API real (`QueueEntryResponse` não tem data de nascimento) — gap documentado. */
+  personBirthDate?: string;
   unidadeId: string;
   especialidade: string;
   prioridade: PrioridadeFila;

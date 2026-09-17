@@ -24,7 +24,9 @@ export function AbaConsentimentos({ pessoaId }: AbaConsentimentosProps) {
   });
 
   const revogarMutation = useMutation({
-    mutationFn: (consentId: string) => revogarConsentimento(pessoaId, consentId),
+    // Backend real exige justificativa no corpo do DELETE — sem prompt dedicado
+    // na UI ainda, usamos um texto padrão (gap documentado).
+    mutationFn: (consentId: string) => revogarConsentimento(pessoaId, consentId, "Revogado pelo profissional via painel."),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pessoas", pessoaId, "consentimentos"] });
       toast.success("Consentimento revogado.");

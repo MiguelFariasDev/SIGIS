@@ -20,10 +20,14 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+const SENHA_DEMO = "Senha123!";
+
 const CONTAS_DEMO = [
-  { papel: "Profissional", email: "camila.teixeira@crateus.ce.gov.br" },
-  { papel: "Coordenador(a)", email: "roberto.meneses@crateus.ce.gov.br" },
-  { papel: "Auditor(a) / DPO", email: "fernanda.cavalcante@crateus.ce.gov.br" },
+  { papel: "Coordenador(a) — NASF", email: "coordenador@sigis.gov.br" },
+  { papel: "Profissional — NAPE", email: "psicologo@sigis.gov.br" },
+  { papel: "Profissional — Casa Mais Azul", email: "fono@cma.gov.br" },
+  { papel: "Profissional — CRASF", email: "assistente@crasf.gov.br" },
+  { papel: "Auditor(a) / DPO — NASF", email: "auditor@sigis.gov.br" },
 ];
 
 export function LoginPage() {
@@ -106,7 +110,9 @@ export function LoginPage() {
         </form>
 
         <div className="mt-8 rounded-lg border border-sus-blue-light bg-sus-blue-light/50 p-3">
-          <p className="mb-2 text-xs font-semibold text-sus-blue-dark">Contas de demonstracao (qualquer senha)</p>
+          <p className="mb-2 text-xs font-semibold text-sus-blue-dark">
+            Contas de demonstracao (senha: {SENHA_DEMO})
+          </p>
           <ul className="space-y-1">
             {CONTAS_DEMO.map((conta) => (
               <li key={conta.email}>
@@ -115,7 +121,7 @@ export function LoginPage() {
                   className="text-xs text-sus-blue-dark/80 hover:underline"
                   onClick={() => {
                     setValue("email", conta.email);
-                    setValue("senha", "demo123");
+                    setValue("senha", SENHA_DEMO);
                   }}
                 >
                   {conta.papel}: {conta.email}

@@ -11,7 +11,8 @@ interface TimelineProps {
   /** Quantidade de eventos cross-secretaria ainda ocultos (nao contados em `eventos` liberados). */
   hiddenCount?: number;
   personId: string;
-  onAccessGranted?: (secretariat: Secretariat) => void;
+  /** Concedido pelo backend real de forma global (não por secretaria) — recebe a justificativa usada. */
+  onAccessGranted?: (justificativa: string) => void;
 }
 
 export function Timeline({ eventos, hiddenCount = 0, personId, onAccessGranted }: TimelineProps) {
@@ -45,8 +46,8 @@ export function Timeline({ eventos, hiddenCount = 0, personId, onAccessGranted }
           onOpenChange={(open) => !open && setSecretariaSolicitada(null)}
           personId={personId}
           secretariat={secretariaSolicitada}
-          onGranted={(secretariat) => {
-            onAccessGranted?.(secretariat);
+          onGranted={(_secretariat, justificativa) => {
+            onAccessGranted?.(justificativa);
             setSecretariaSolicitada(null);
           }}
         />

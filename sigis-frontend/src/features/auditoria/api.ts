@@ -2,19 +2,53 @@ import { apiClient } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/api/endpoints";
 import type { AuditoriaFiltros, LogAcesso } from "@/lib/types/logAcesso";
 
+interface BackendAccessLog {
+  id: string;
+  personId: string;
+  personName: string;
+  professionalId: string;
+  professionalName: string;
+  action: string;
+  legalBasis: string;
+  justification?: string;
+  dateTime: string;
+  isCrossUnit: boolean;
+}
+
+function mapAccessLog(log: BackendAccessLog): LogAcesso {
+  return {
+    id: log.id,
+    personId: log.personId,
+    personName: log.personName,
+    profissionalId: log.professionalId,
+    profissionalNome: log.professionalName,
+    acao: log.action,
+    baseLegal: log.legalBasis,
+    justificativa: log.justification,
+    dataHora: log.dateTime,
+    crossUnidade: log.isCrossUnit,
+  };
+}
+
+/**
+ * `GET /api/auditoria/acessos` real não aceita `acao`/`secretariat`/
+ * `crossUnidade` como filtros (só pessoa, profissional e período) — os
+ * demais filtros do formulário são aplicados no cliente (gap documentado).
+ */
 export async function fetchAuditoria(filtros: AuditoriaFiltros): Promise<LogAcesso[]> {
-  const { data } = await apiClient.get<LogAcesso[]>(ENDPOINTS.auditoria.base, {
+  const { data } = await apiClient.get<BackendAccessLog[]>(ENDPOINTS.auditoria.acessos, {
     params: {
-      personId: filtros.personId || undefined,
+      pessoaId: filtros.personId || undefined,
       profissionalId: filtros.profissionalId || undefined,
-      acao: filtros.acao || undefined,
       dataInicio: filtros.dataInicio || undefined,
       dataFim: filtros.dataFim || undefined,
-      secretariat: filtros.secretariat || undefined,
-      crossUnidade: filtros.crossUnidadeApenas || undefined,
     },
   });
-  return data;
+
+  let logs = data.map(mapAccessLog);
+  if (filtros.acao) logs = logs.filter((l) => l.acao === filtros.acao);
+  if (filtros.crossUnidadeApenas) logs = logs.filter((l) => l.crossUnidade);
+  return logs;
 }
 
 export async function exportarAuditoriaCsv(): Promise<void> {

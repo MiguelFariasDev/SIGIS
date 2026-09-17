@@ -30,7 +30,7 @@ export function RecebidosPage() {
 
   const recebidosQuery = useQuery({
     queryKey: ["encaminhamentos", "recebidos", usuario?.unidadeId],
-    queryFn: () => fetchEncaminhamentosRecebidos(usuario!.unidadeId),
+    queryFn: () => fetchEncaminhamentosRecebidos(),
     enabled: !!usuario,
   });
 
