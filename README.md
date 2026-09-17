@@ -220,6 +220,40 @@ O cruzamento Saúde ↔ Educação (NASF/NAPE) é o mais sensível e tem tratame
 
 
 
+TELAS DO SISTEMA
+
+
+
+### Web — Painel da rede (React)
+
+| Fila de atendimento | Ficha do paciente — timeline federada |
+| --- | --- |
+| ![Fila de atendimento, com colunas por especialidade e prioridade](./screenshots/fila.png) | ![Timeline consolidada do paciente entre serviços](./screenshots/historico.png) |
+
+| Encaminhamento entre unidades | Solicitação de acesso cross-secretaria (LGPD) |
+| --- | --- |
+| ![Modal de encaminhamento com unidade de destino, prioridade e motivo](./screenshots/encaminhamento.png) | ![Modal de solicitação de acesso com base legal e justificativa obrigatória](./screenshots/lgpd.png) |
+
+| Fila de duplicidades | Auditoria de acessos |
+| --- | --- |
+| ![Fila de duplicidades com score de similaridade e status pendente](./screenshots/duplicidade.png) | ![Log de auditoria de acessos cross-unidade com base legal](./screenshots/auditoria.png) |
+
+Tela de login, com contas de demonstração por papel (RBAC):
+
+![Tela de login do SIGIS com contas de demonstração por papel](./screenshots/login.png)
+
+### Mobile — Uso em campo (Flutter)
+
+| Login | Fila de atendimento |
+| --- | --- |
+| ![Tela de login do app mobile](./screenshots/mobile2.png) | ![Fila de atendimento no app mobile, com busca e ações de comparecimento/falta](./screenshots/mobile.png) |
+
+
+
+--------------------------------------------------------------------------------
+
+
+
 COMO SUBIR
 
 
@@ -346,12 +380,14 @@ make test-mobile # só mobile
 
 
 
-Base URL local: `http://localhost:5000`. Todos os endpoints (exceto login)
-exigem o header `Authorization: Bearer <token>` obtido em `POST
-/api/auth/login`. Corpo de erro padrão: `{"code": "...", "description": "...", "type": "..."}`
-— o status HTTP é sempre derivado do `type` do erro:
-`NotFound → 404`, `Conflict → 409`, `Unauthorized → 401`, `Forbidden → 403`,
-`Internal → 500`, qualquer outro (validação) `→ 400`.
+Base URL local: `http://localhost:5000`. Todos os endpoints (exceto login,
+`/health` e `/api/version`) exigem o header `Authorization: Bearer <token>`
+obtido em `POST /api/auth/login`. Corpo de erro padrão: `{"code": "...",
+"message": "..."}` — o status HTTP é derivado internamente do tipo do erro
+(não exposto no JSON): `NotFound → 404`, `Conflict → 409`,
+`Unauthorized → 401`, `Forbidden → 403`, `Internal → 500`, qualquer outro
+(validação) `→ 400`. Documentação completa, com todos os campos de
+request/response, em [docs/api.md](./docs/api.md).
 
 Papéis RBAC: **Professional** (própria unidade), **Coordinator** (rede
 completa + merge/deduplicação), **Auditor** (somente leitura de auditoria).
@@ -389,6 +425,8 @@ usuário autenticado (`RequireAuthenticated`).
 | Método | Rota | Auth | Body | Respostas |
 | --- | --- | --- | --- | --- |
 | POST | `/api/atendimentos` | Autenticado | `RegisterAttendanceRequest` (personId, unitId, professionalId, dateTime, sessionType, formData?...) | 201, 400, 404 |
+| GET | `/api/atendimentos/{id}` | Autenticado | — | 200, 404 |
+| GET | `/api/atendimentos/pessoa/{pessoaId}` | Autenticado | — | 200 (lista, pode ser vazia) |
 | PATCH | `/api/atendimentos/{id}/comparecimento` | Autenticado | `{ comparecimento, mainComplaint? }` | 200, 400, 404, 409 (comparecimento já registrado) |
 
 ### Encaminhamentos (`/api/encaminhamentos`)
@@ -419,6 +457,7 @@ usuário autenticado (`RequireAuthenticated`).
 | GET | `/api/pessoas/{pessoaId}/consentimentos` | Autenticado | — | 200, 404 |
 | POST | `/api/pessoas/{pessoaId}/consentimentos` | Autenticado | `{ type, version, evidence?, grantedByGuardianId? }` | 201, 400, 404, 409 (já ativo do mesmo tipo) |
 | DELETE | `/api/pessoas/{pessoaId}/consentimentos/{id}` | Autenticado | `{ justification }` | 204, 400, 404, 409 (já revogado) |
+| GET | `/api/consentimentos?personId=&type=&status=&dataInicio=&dataFim=` | **Coordinator** | — | 200 (painel global, todas as pessoas) |
 
 ### Auditoria (`/api/auditoria`) — restrito ao papel **Auditor**
 
@@ -433,6 +472,9 @@ usuário autenticado (`RequireAuthenticated`).
 | Método | Rota | Auth | Body | Respostas |
 | --- | --- | --- | --- | --- |
 | GET | `/api/indicadores/painel?unidadeId=&dataInicio=&dataFim=` | Autenticado | — | 200 (painel de fila/atendimentos/encaminhamentos) |
+| GET | `/api/indicadores/fila-por-servico` | Autenticado | — | 200 (fila aguardando/em atendimento por serviço) |
+| GET | `/api/indicadores/atendimentos-por-dia?periodo=` | Autenticado | — | 200 (`periodo`: HOJE\|7D\|30D) |
+| GET | `/api/indicadores/alertas-recentes` | Autenticado | — | 200 (duplicidade/busca ativa recentes) |
 
 ### Unidades de serviço (`/api/unidades`)
 
@@ -481,6 +523,8 @@ sigis/
 │ ├── requisitos.md
 
 │ ├── system-design.md
+
+│ ├── api.md
 
 │ ├── fluxos.md
 
@@ -546,6 +590,7 @@ DOCUMENTAÇÃO
 
 | Documento                | Conteúdo                                     |
 | ------------------------ | -------------------------------------------- |
+| docs/api.md               | Referência completa da API (rotas, auth, request/response) |
 | docs/lgpd.md             | Mecanismo de compartilhamento e conformidade |
 | docs/governanca-dados.md | Governança entre Secretarias                 |
 
