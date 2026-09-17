@@ -36,7 +36,40 @@ Esse diagnóstico foi feito pela própria Secretaria Municipal de Saúde e é o 
 
 
 
+A SOLUÇÃO
+
+
+
+O SIGIS resolve as quatro dores com quatro pilares técnicos:
+
+
+
+| Pilar                   | O que faz                                                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Cadastro único          | Pessoa como núcleo canônico de identidade, com deduplicação em 3 camadas (CNS → CPF → similaridade pg_trgm)      |
+| Fila multidisciplinar   | Visível, priorizável por serviço e por especialidade, respeitando o escopo de cada unidade                       |
+| Linha do tempo federada | Histórico consolidado entre Saúde, Educação e Assistência, com metadados por padrão e conteúdo sob consentimento |
+| Compartilhamento LGPD   | Consentimento granular por tipo, base legal explícita, auditoria antes do acesso cross-secretaria                |
+
+
+
+Diferenciais:
+
+
+
+- Intersetorial de verdade — cobre as duas facetas da pessoa: paciente (Saúde) e aluno (Educação). As fichas do NASF e do NAPE são radicalmente diferentes, e o SIGIS preserva cada uma sem forçar prontuário único genérico.
+
+- JSONB para formulários por serviço — cada unidade mantém sua ficha própria (anamnese psicológica, psicopedagógica, instrumental de educação física, síntese) sem exigir migração de schema a cada novo campo.
+
+- Rastreio de fluxo entre unidades — encaminhamento NASF → NAPE com timeline visual: quem encaminhou, quando, quem aceitou, quando atendeu.
+
+- Mobile offline-first — o agente de saúde registra check-in e sessão mesmo sem internet; o app sincroniza quando a conexão volta.
+
+
+
 --------------------------------------------------------------------------------
+
+
 
 ## Arquitetura
 
@@ -120,44 +153,6 @@ fluindo sempre de fora para dentro:
    404, 409) pela classe base dos controllers.
 8. Se houver acesso cross-secretaria, um log de auditoria é gravado **antes**
    de retornar os dados ao cliente.
-
-
-
-A SOLUÇÃO
-
-
-
-O SIGIS resolve as quatro dores com quatro pilares técnicos:
-
-
-
-| Pilar                   | O que faz                                                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Cadastro único          | Pessoa como núcleo canônico de identidade, com deduplicação em 3 camadas (CNS → CPF → similaridade pg_trgm)      |
-| Fila multidisciplinar   | Visível, priorizável por serviço e por especialidade, respeitando o escopo de cada unidade                       |
-| Linha do tempo federada | Histórico consolidado entre Saúde, Educação e Assistência, com metadados por padrão e conteúdo sob consentimento |
-| Compartilhamento LGPD   | Consentimento granular por tipo, base legal explícita, auditoria antes do acesso cross-secretaria                |
-
-
-
-Diferenciais:
-
-
-
-- Intersetorial de verdade — cobre as duas facetas da pessoa: paciente (Saúde) e aluno (Educação). As fichas do NASF e do NAPE são radicalmente diferentes, e o SIGIS preserva cada uma sem forçar prontuário único genérico.
-
-- JSONB para formulários por serviço — cada unidade mantém sua ficha própria (anamnese psicológica, psicopedagógica, instrumental de educação física, síntese) sem exigir migração de schema a cada novo campo.
-
-- Rastreio de fluxo entre unidades — encaminhamento NASF → NAPE com timeline visual: quem encaminhou, quando, quem aceitou, quando atendeu.
-
-- Mobile offline-first — o agente de saúde registra check-in e sessão mesmo sem internet; o app sincroniza quando a conexão volta.
-
-
-
---------------------------------------------------------------------------------
-
-
-
 
 
 --------------------------------------------------------------------------------
