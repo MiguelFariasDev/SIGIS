@@ -46,9 +46,24 @@ public sealed class AttendanceRepository : IAttendanceRepository
         => await _context.Attendances.AddAsync(attendance, cancellationToken);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Attendance>> SearchAsync(
+        Guid? unitId, DateTime? from, DateTime? to, CancellationToken cancellationToken)
+        => await _context.Attendances
+            .Where(a => (!unitId.HasValue || a.UnitId == unitId.Value)
+                && (!from.HasValue || a.DateTime >= from.Value)
+                && (!to.HasValue || a.DateTime <= to.Value))
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
     public Task UpdateAsync(Attendance attendance, CancellationToken cancellationToken)
     {
         _context.Attendances.Update(attendance);
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc />
+    public async Task<int> ReassignPersonAsync(Guid fromPersonId, Guid toPersonId, CancellationToken cancellationToken)
+        => await _context.Attendances
+            .Where(a => a.PersonId == fromPersonId)
+            .ExecuteUpdateAsync(s => s.SetProperty(a => a.PersonId, toPersonId), cancellationToken);
 }

@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: sigis
       POSTGRES_PASSWORD: sigis_dev
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - sigis-db-data:/var/lib/postgresql/data
       - ./docker/init-extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql

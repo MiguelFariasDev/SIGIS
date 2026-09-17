@@ -35,6 +35,14 @@ public sealed class QueueEntryRepository : IQueueEntryRepository
             .ToListAsync(cancellationToken);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<QueueEntry>> GetByUnitAsync(Guid unitId, CancellationToken cancellationToken)
+        => await _context.QueueEntries
+            .Where(q => q.UnitId == unitId)
+            .OrderBy(q => q.Priority)
+            .ThenBy(q => q.EnteredAt)
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
     public async Task<bool> HasActiveEntryAsync(Guid personId, Guid unitId, CancellationToken cancellationToken)
         => await _context.QueueEntries.AnyAsync(
             q => q.PersonId == personId
@@ -47,9 +55,24 @@ public sealed class QueueEntryRepository : IQueueEntryRepository
         => await _context.QueueEntries.AddAsync(queueEntry, cancellationToken);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<QueueEntry>> SearchAsync(
+        Guid? unitId, DateTime? from, DateTime? to, CancellationToken cancellationToken)
+        => await _context.QueueEntries
+            .Where(q => (!unitId.HasValue || q.UnitId == unitId.Value)
+                && (!from.HasValue || q.EnteredAt >= from.Value)
+                && (!to.HasValue || q.EnteredAt <= to.Value))
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
     public Task UpdateAsync(QueueEntry queueEntry, CancellationToken cancellationToken)
     {
         _context.QueueEntries.Update(queueEntry);
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc />
+    public async Task<int> ReassignPersonAsync(Guid fromPersonId, Guid toPersonId, CancellationToken cancellationToken)
+        => await _context.QueueEntries
+            .Where(q => q.PersonId == fromPersonId)
+            .ExecuteUpdateAsync(s => s.SetProperty(q => q.PersonId, toPersonId), cancellationToken);
 }

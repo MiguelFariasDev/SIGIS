@@ -15,7 +15,11 @@ namespace Sigis.Infrastructure.Services;
 /// </summary>
 public sealed class CurrentUserService : ICurrentUserService
 {
-    private const string ProfessionalIdClaim = "professional_id";
+    // "sub" (não "professional_id") porque é a claim que JwtTokenService
+    // efetivamente emite (JwtRegisteredClaimNames.Sub) para o id do
+    // profissional — usar um nome de claim diferente aqui fazia
+    // ProfessionalId retornar sempre null.
+    private const string ProfessionalIdClaim = "sub";
     private const string UnitIdClaim = "unit_id";
     private const string RoleClaim = "role";
 

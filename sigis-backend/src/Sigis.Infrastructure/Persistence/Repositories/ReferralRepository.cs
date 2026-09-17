@@ -46,9 +46,24 @@ public sealed class ReferralRepository : IReferralRepository
         => await _context.Referrals.AddAsync(referral, cancellationToken);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Referral>> SearchAsync(
+        Guid? unitId, DateTime? from, DateTime? to, CancellationToken cancellationToken)
+        => await _context.Referrals
+            .Where(r => (!unitId.HasValue || r.OriginUnitId == unitId.Value || r.DestinationUnitId == unitId.Value)
+                && (!from.HasValue || r.ReferralDate >= from.Value)
+                && (!to.HasValue || r.ReferralDate <= to.Value))
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
     public Task UpdateAsync(Referral referral, CancellationToken cancellationToken)
     {
         _context.Referrals.Update(referral);
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc />
+    public async Task<int> ReassignPersonAsync(Guid fromPersonId, Guid toPersonId, CancellationToken cancellationToken)
+        => await _context.Referrals
+            .Where(r => r.PersonId == fromPersonId)
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.PersonId, toPersonId), cancellationToken);
 }

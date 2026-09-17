@@ -22,6 +22,10 @@ public sealed class PersonConsentRepository : IPersonConsentRepository
     }
 
     /// <inheritdoc />
+    public async Task<PersonConsent?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        => await _context.PersonConsents.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<PersonConsent>> GetByPersonAsync(Guid personId, CancellationToken cancellationToken)
         => await _context.PersonConsents
             .Where(c => c.PersonId == personId)

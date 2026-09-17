@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Sigis.Infrastructure.Persistence.Context;
@@ -11,9 +12,11 @@ using Sigis.Infrastructure.Persistence.Context;
 namespace Sigis.Infrastructure.Migrations
 {
     [DbContext(typeof(SigisDbContext))]
-    partial class SigisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260917021149_AddCoverageEntities")]
+    partial class AddCoverageEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

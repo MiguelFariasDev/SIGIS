@@ -38,4 +38,22 @@ public sealed class AccessLogRepository : IAccessLogRepository
     /// <inheritdoc />
     public async Task AddAsync(AccessLog accessLog, CancellationToken cancellationToken)
         => await _context.AccessLogs.AddAsync(accessLog, cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<AccessLog>> SearchAsync(
+        Guid? personId, Guid? professionalId, DateTime? from, DateTime? to, CancellationToken cancellationToken)
+        => await _context.AccessLogs
+            .Where(l => (!personId.HasValue || l.PersonId == personId.Value)
+                && (!professionalId.HasValue || l.ProfessionalId == professionalId.Value)
+                && (!from.HasValue || l.DateTime >= from.Value)
+                && (!to.HasValue || l.DateTime <= to.Value))
+            .OrderByDescending(l => l.DateTime)
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<AccessLog>> GetCrossUnitAsync(CancellationToken cancellationToken)
+        => await _context.AccessLogs
+            .Where(l => EF.Property<bool>(l, "_isCrossUnit"))
+            .OrderByDescending(l => l.DateTime)
+            .ToListAsync(cancellationToken);
 }
