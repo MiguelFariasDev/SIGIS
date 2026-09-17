@@ -232,33 +232,97 @@ Pré-requisitos:
 
 - Docker + Docker Compose — https://www.docker.com/
 
-- Flutter 3.27+ — https://flutter.dev/
+- Flutter 3.27+ — https://flutter.dev/ (só necessário para o app mobile)
 
 
 
-Subir os 3 containers:
+### Opção 1 — tudo em Docker (um comando)
 
-make up
+make up      # sobe sigis-db (5435), sigis-api (5000) e sigis-front (5173)
 
+make migrate # roda as migrations do EF Core dentro do container
 
-
-Sobe: sigis-db (PostgreSQL 16), sigis-api (.NET 10, porta 5000) e sigis-front (React 19 + Vite, porta 5173).
-
-
-
-Rodar migrations:
-
-make migrate
+make down    # encerra os containers
 
 
 
-Popular com dados de demonstração:
+### Opção 2 — passo a passo manual (3 abas de terminal)
 
-make seed
+Mais prático para desenvolver: o banco fica em container, mas o backend e o
+frontend rodam direto na máquina (hot reload, debug, etc.). Depois de clonar
+o repositório, abra 3 abas de terminal na raiz do projeto:
+
+**Aba 1 — Banco de dados (Docker)**
+
+docker compose up -d sigis-db
+
+Sobe só o PostgreSQL 16 (extensões `pg_trgm`, `unaccent`, `pgcrypto` já
+aplicadas via `docker/init-extensions.sql`), exposto em `localhost:5435`.
+Confirme que subiu com `docker compose ps` (status `healthy`).
+
+**Aba 2 — Backend (.NET)**
+
+cd sigis-backend
+
+dotnet tool install --global dotnet-ef   # só na primeira vez
+
+dotnet ef database update \
+
+  --project src/Sigis.Infrastructure \
+
+  --startup-project src/Sigis.Api
+
+dotnet run --project src/Sigis.Api --urls http://localhost:5000
+
+O `appsettings.Development.json` já aponta para `localhost:5435` (o banco
+da Aba 1), então nenhuma configuração extra é necessária. A API sobe em
+`http://localhost:5000` e o Swagger fica disponível em
+`http://localhost:5000/swagger` (só em ambiente Development).
+
+**Aba 3 — Frontend (React + Vite)**
+
+cd sigis-frontend
+
+npm install
+
+npm run dev
+
+Sobe em `http://localhost:5173`. O arquivo `.env.local` já existe com
+`VITE_API_URL=http://localhost:5000` e `VITE_USE_MOCKS=false` — garanta que
+`VITE_USE_MOCKS` esteja `false` para consumir a API real em vez dos mocks
+(MSW) usados nos testes/Storybook.
 
 
 
-Popula: 5 unidades (NASF, CREAES, NAPE, Casa Mais Azul, CRASF), 3 profissionais (um por papel), 10 pessoas — incluindo 2 gêmeas de dados (mesmo nome + mesma data de nascimento, em unidades diferentes) para demonstrar a deduplicação ao vivo.
+### Popular o banco com dados de demonstração
+
+Não é preciso rodar um script `.sql` à parte: assim que o backend sobe em
+ambiente Development (Aba 2, `dotnet run`), o `DevelopmentSeeder` roda
+automaticamente e popula o banco **se ele ainda estiver vazio** (é
+idempotente — reiniciar a API não duplica os dados). Isso evita que um dump
+`.sql` fique desatualizado a cada nova migration.
+
+O seed cria: 5 unidades (NASF, CREAES/NAPE, Casa Mais Azul, CRASF), 5
+profissionais (um por papel/unidade), 12 pessoas — incluindo casos prontos
+para demonstração (2 "gêmeas" de cadastro para a deduplicação, timeline
+federada, consentimento parcial, encaminhamento aceito), filas, atendimentos,
+1 alerta de duplicidade pendente e logs de auditoria.
+
+Se preferir disparar o seed manualmente (fora do fluxo automático), use:
+
+make seed   # equivale a: dotnet run --project sigis-backend/src/Sigis.Api -- --seed
+
+**Credenciais de demonstração** (senha igual para todos: `Senha123!`):
+
+| Papel (RBAC)  | E-mail                     | Unidade       |
+| ------------- | --------------------------- | ------------- |
+| Coordenador   | coordenador@sigis.gov.br    | NASF          |
+| Profissional  | psicologo@sigis.gov.br      | NAPE          |
+| Profissional  | fono@cma.gov.br             | Casa Mais Azul|
+| Profissional  | assistente@crasf.gov.br     | CRASF         |
+| Auditor       | auditor@sigis.gov.br        | NASF          |
+
+Login: `POST http://localhost:5000/api/auth/login` com `{"email": "...", "password": "Senha123!"}` — o token JWT retornado deve ser usado no header `Authorization: Bearer <token>` nas demais chamadas (ou colado direto no botão "Authorize" do Swagger).
 
 
 
@@ -274,9 +338,127 @@ make test-mobile # só mobile
 
 
 
-Encerrar:
+--------------------------------------------------------------------------------
 
-make down
+
+
+## ENDPOINTS DA API
+
+
+
+Base URL local: `http://localhost:5000`. Todos os endpoints (exceto login)
+exigem o header `Authorization: Bearer <token>` obtido em `POST
+/api/auth/login`. Corpo de erro padrão: `{"code": "...", "description": "...", "type": "..."}`
+— o status HTTP é sempre derivado do `type` do erro:
+`NotFound → 404`, `Conflict → 409`, `Unauthorized → 401`, `Forbidden → 403`,
+`Internal → 500`, qualquer outro (validação) `→ 400`.
+
+Papéis RBAC: **Professional** (própria unidade), **Coordinator** (rede
+completa + merge/deduplicação), **Auditor** (somente leitura de auditoria).
+Onde não houver política específica indicada, o endpoint aceita qualquer
+usuário autenticado (`RequireAuthenticated`).
+
+### Autenticação (`/api/auth`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| POST | `/api/auth/login` | Público | `{ email, password }` | 200 (token), 400, 401, 403 |
+| GET | `/api/auth/me` | Autenticado | — | 200 (dados do profissional logado), 401 |
+
+### Pessoas — Cadastro único (`/api/pessoas`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| POST | `/api/pessoas` | Autenticado | `CreatePersonRequest` (nome, nascimento, CNS/CPF opcionais, endereço opcional...) | 201 (criado sem suspeita de duplicidade), 200 (criado + candidatos a duplicidade), 400, 409 (CNS/CPF já existente) |
+| GET | `/api/pessoas/busca?termo=&limit=` | Autenticado | — | 200 (lista, pode ser vazia) |
+| GET | `/api/pessoas/{id}` | Autenticado | — | 200, 404 |
+| GET | `/api/pessoas/{id}/linha-do-tempo?nivel=&justificativa=` | Autenticado | — | 200, 403 (justificativa obrigatória e não informada), 404 |
+| POST | `/api/pessoas/mesclar` | **Coordinator** | `{ sourcePersonId, targetPersonId, duplicateAlertId? }` | 200, 400 (origem = destino), 404 |
+| POST | `/api/pessoas/{id}/solicitar-acesso` | Autenticado | `{ justificativa }` | 200, 400, 404 |
+
+### Fila de atendimento (`/api/filas`, `/api/unidades/{unidadeId}/fila`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| GET | `/api/unidades/{unidadeId}/fila?status=&prioridade=&especialidade=` | Autenticado | — | 200, 404 (unidade não existe) |
+| POST | `/api/filas/{id}/chamar` | Autenticado | — | 200, 404, 409 (transição de status inválida) |
+| PATCH | `/api/filas/{id}/comparecimento` | Autenticado | `{ comparecimento: "COMPARECEU"\|"FALTOU" }` | 200, 400, 404, 409 (fila já concluída) |
+
+### Atendimentos (`/api/atendimentos`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| POST | `/api/atendimentos` | Autenticado | `RegisterAttendanceRequest` (personId, unitId, professionalId, dateTime, sessionType, formData?...) | 201, 400, 404 |
+| PATCH | `/api/atendimentos/{id}/comparecimento` | Autenticado | `{ comparecimento, mainComplaint? }` | 200, 400, 404, 409 (comparecimento já registrado) |
+
+### Encaminhamentos (`/api/encaminhamentos`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| POST | `/api/encaminhamentos` | Autenticado | `{ personId, originUnitId, destinationUnitId, reason?, priority }` | 201, 400, 403, 404 |
+| GET | `/api/encaminhamentos/recebidos` | Autenticado | — | 200 (da unidade do profissional logado), 403 |
+| GET | `/api/encaminhamentos/enviados` | Autenticado | — | 200 (da unidade do profissional logado), 403 |
+| GET | `/api/encaminhamentos/pessoa/{pessoaId}` | Autenticado | — | 200 |
+| POST | `/api/encaminhamentos/{id}/aceitar` | Autenticado | — | 200, 404, 409 (não está pendente) |
+| POST | `/api/encaminhamentos/{id}/recusar` | Autenticado | `{ motivo? }` | 200, 400, 404, 409 (não está pendente) |
+| GET | `/api/encaminhamentos/{id}/rastreio` | Autenticado | — | 200, 404 |
+
+### Duplicidades (`/api/duplicidades`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| GET | `/api/duplicidades/pendentes?skip=&take=` | **Coordinator** | — | 200 (lista, pode ser vazia) |
+| GET | `/api/duplicidades/{id}` | **Coordinator** | — | 200, 404 |
+| POST | `/api/duplicidades/{id}/resolver` | **Coordinator** | `{ acao: "MESCLAR"\|"FALSO_POSITIVO" }` | 200, 400, 404, 409 (já resolvido) |
+| POST | `/api/duplicidades/{id}/falso-positivo` | **Coordinator** | `{ note? }` | 204, 404, 409 (já resolvido) |
+
+### Consentimentos LGPD (`/api/pessoas/{pessoaId}/consentimentos`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| GET | `/api/pessoas/{pessoaId}/consentimentos` | Autenticado | — | 200, 404 |
+| POST | `/api/pessoas/{pessoaId}/consentimentos` | Autenticado | `{ type, version, evidence?, grantedByGuardianId? }` | 201, 400, 404, 409 (já ativo do mesmo tipo) |
+| DELETE | `/api/pessoas/{pessoaId}/consentimentos/{id}` | Autenticado | `{ justification }` | 204, 400, 404, 409 (já revogado) |
+
+### Auditoria (`/api/auditoria`) — restrito ao papel **Auditor**
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| GET | `/api/auditoria/acessos?pessoaId=&profissionalId=&dataInicio=&dataFim=` | **Auditor** | — | 200 |
+| GET | `/api/auditoria/acessos-cross` | **Auditor** | — | 200 (acessos que cruzaram unidades/secretarias) |
+| GET | `/api/auditoria/export-csv?pessoaId=&profissionalId=&dataInicio=&dataFim=` | **Auditor** | — | 200 (arquivo `.csv`, mesmos filtros de `/acessos`) |
+
+### Indicadores (`/api/indicadores`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| GET | `/api/indicadores/painel?unidadeId=&dataInicio=&dataFim=` | Autenticado | — | 200 (painel de fila/atendimentos/encaminhamentos) |
+
+### Unidades de serviço (`/api/unidades`)
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| GET | `/api/unidades` | Autenticado | — | 200 (lista completa, para seletores da UI) |
+
+### Bases legais LGPD (`/api/legal-basis`) — conteúdo estático
+
+| Método | Rota | Auth | Body | Respostas |
+| --- | --- | --- | --- | --- |
+| GET | `/api/legal-basis?secretariat=` | Autenticado | — | 200 |
+
+### Ficha ampliada da pessoa (sub-recursos de `/api/pessoas/{pessoaId}/...`)
+
+Cada um destes segue o mesmo padrão GET (consulta) / POST ou PUT (grava);
+todos exigem `Autenticado` e retornam 404 quando a pessoa não existir.
+
+| Método | Rota | Body | Respostas |
+| --- | --- | --- | --- |
+| GET / PUT | `/api/pessoas/{pessoaId}/perfil-clinico` | `{ medicalRecordNumber?, clinicalHypothesis?, apsReferenceUnitId? }` | 200, 400, 404, 409 (nº de prontuário duplicado na unidade) |
+| GET / PUT | `/api/pessoas/{pessoaId}/composicao-familiar` | todos os campos opcionais (pai/mãe, irmãos, gestação...) | 200, 400, 404 |
+| GET / PUT | `/api/pessoas/{pessoaId}/desenvolvimento` | todos os campos opcionais (marcos motores, dificuldades...) | 200, 400, 404 |
+| GET / POST | `/api/pessoas/{pessoaId}/historico-escolar` | `{ schoolName, grade, schoolYear, shift?, classGroup?, startDate?, notes? }` | GET: 200, 404 · POST: 201, 400, 404, 409 (vínculo ativo já existe) |
+| GET / POST | `/api/pessoas/{pessoaId}/dificuldades-aprendizagem` | `{ type, severity?, assessmentDate?, notes? }` | GET: 200, 404 · POST: 201, 400, 404, 409 (já registrado) |
+| GET / POST / DELETE | `/api/pessoas/{pessoaId}/tratamentos-concomitantes` | `{ specialty, location, professionalName, dayOfWeek, startTime, endTime, notes? }` | GET: 200, 404 · POST: 201, 400, 404, 409 (sobreposição de horário) · DELETE `/{id}`: 204, 404 |
 
 
 
