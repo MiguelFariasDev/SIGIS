@@ -1,0 +1,19 @@
+/**
+ * Paleta SIGIS — inspirada na identidade visual da saude publica brasileira.
+ * Nao reproduz o simbolo oficial do SUS, apenas a linguagem de cor
+ * (azul institucional + verde + amarelo de alerta + vermelho de erro).
+ */
+@theme {
+  --color-sus-blue: #0056a6;
+  --color-sus-blue-dark: #003d7a;
+  --color-sus-blue-light: #e6f0fa;
+  --color-sus-green: #00a859;
+  --color-sus-green-dark: #007a40;
+  --color-sus-green-light: #e6f7ee;
+  --color-sus-yellow: #ffcb00;
+  --color-sus-yellow-dark: #b38c00;
+  --color-sus-yellow-light: #fff8e0;
+  --color-sus-red: #e30613;
+  --color-sus-red-dark: #a3040e;
+  --color-sus-red-light: #fbe6e7;
+}

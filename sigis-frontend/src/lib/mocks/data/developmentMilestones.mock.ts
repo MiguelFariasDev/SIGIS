@@ -1,0 +1,36 @@
+import type { DevelopmentMilestones } from "@/lib/types/developmentMilestones";
+
+export const developmentMilestonesMock: DevelopmentMilestones[] = [
+  {
+    id: "desenvolvimento-01",
+    personId: "pessoa-01",
+    ageWalkedMonths: 14,
+    ageTalkedMonths: 22,
+    locomotionDifficulty: false,
+    coordinationDifficulty: true,
+    visualDifficulty: false,
+    hearingDifficulty: false,
+    speechProblems: "Atraso na fala, ecolalia ocasional.",
+    commandComprehension: "Compreende comandos simples, dificuldade com instrucoes de 2 etapas.",
+    communicationForm: "Verbal com apoio de gestos.",
+    manualDominance: "Destro",
+    createdAt: "2025-11-04T09:12:00Z",
+    updatedAt: "2025-11-04T09:12:00Z",
+  },
+  {
+    id: "desenvolvimento-02",
+    personId: "pessoa-10",
+    ageWalkedMonths: 16,
+    ageTalkedMonths: 30,
+    locomotionDifficulty: false,
+    coordinationDifficulty: false,
+    visualDifficulty: false,
+    hearingDifficulty: false,
+    speechProblems: "Vocabulario restrito para a idade.",
+    commandComprehension: "Boa compreensao de comandos simples.",
+    communicationForm: "Verbal, poucas palavras.",
+    manualDominance: "Ambidestro",
+    createdAt: "2025-06-11T10:00:00Z",
+    updatedAt: "2025-06-11T10:00:00Z",
+  },
+];
