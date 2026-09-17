@@ -10,7 +10,7 @@
 
 ---
 
-## 🎯 O problema
+## O problema
 
 A rede pública municipal de Crateús — NASF, CREAES, NAPE, Casa Mais Azul e
 CRASF — atende pessoas com TEA hoje com quatro dores concretas:
@@ -28,7 +28,7 @@ ponto de partida do hackathon.
 
 ---
 
-## 💡 A solução
+## A solução
 
 O SIGIS resolve as quatro dores com quatro pilares técnicos:
 
@@ -55,7 +55,7 @@ O SIGIS resolve as quatro dores com quatro pilares técnicos:
 
 ---
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 Monolito modular em Clean Architecture (mesmo padrão do sistema Iustitia, já
 usado pela SEPLATI). Sem microsserviços, sem API Gateway — decisão consciente
@@ -96,7 +96,7 @@ conhece Application e Domain. Api conhece Application e Infrastructure.
 
 ---
 
-## 🧰 Stack
+## Stack
 
 | Camada | Tecnologias |
 |---|---|
@@ -109,7 +109,7 @@ conhece Application e Domain. Api conhece Application e Infrastructure.
 
 ---
 
-## 🔐 LGPD e governança de dados
+## LGPD e governança de dados
 
 Dado de saúde é dado sensível (LGPD, art. 5º, II). O SIGIS implementa:
 
@@ -138,7 +138,7 @@ diferenciado no código.
 
 ---
 
-## 🚀 Como subir
+## Como subir
 
 ### Pré-requisitos
 
@@ -180,7 +180,7 @@ deduplicação ao vivo.
 
 ---
 
-## 📁 Estrutura
+## Estrutura
 
 sigis/
 ├── docker-compose.yml
@@ -217,7 +217,7 @@ sigis/
 
 ---
 
-## 📚 Documentação
+## Documentação
 
 | Documento | Conteúdo |
 |---|---
@@ -226,7 +226,7 @@ sigis/
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [x] Bootstrap (monorepo, Docker, CI)
 - [x] Modelo de domínio (entidades, VOs, enums, erros agrupados)
@@ -242,7 +242,7 @@ sigis/
 
 ---
 
-## 🤝 Contexto
+## Contexto
 
 Desenvolvido para o Hackathon Banco do Nordeste · UFC · Prefeitura de
 Crateús, a partir de necessidade identificada pela Secretaria Municipal de
