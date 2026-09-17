@@ -1,0 +1,38 @@
+name: sigis_mobile
+description: "SIGIS — App mobile para uso em campo (busca, check-in, registro offline-first)."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.6.1
+  dio: ^5.7.0
+  sqflite: ^2.4.1
+  path: ^1.9.0
+  path_provider: ^2.1.5
+  connectivity_plus: ^7.3.1
+  shared_preferences: ^2.3.3
+  flutter_secure_storage: ^11.2.0
+  go_router: ^18.0.1
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+  cpf_cnpj_validator: ^2.0.0
+  intl: ^0.20.3
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.13
+  freezed: ^4.0.1
+  json_serializable: ^6.8.0
+  sqflite_common_ffi: ^2.3.4+4
+
+flutter:
+  uses-material-design: true
