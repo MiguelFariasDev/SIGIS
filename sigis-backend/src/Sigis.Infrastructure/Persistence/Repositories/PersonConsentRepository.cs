@@ -39,6 +39,19 @@ public sealed class PersonConsentRepository : IPersonConsentRepository
             .FirstOrDefaultAsync(c => c.PersonId == personId && c.Type == type && c.RevokedAt == null, cancellationToken);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<PersonConsent>> SearchAsync(
+        Guid? personId, ConsentType? type, bool? revoked, DateTime? from, DateTime? to,
+        CancellationToken cancellationToken)
+        => await _context.PersonConsents
+            .Where(c => !personId.HasValue || c.PersonId == personId.Value)
+            .Where(c => !type.HasValue || c.Type == type.Value)
+            .Where(c => !revoked.HasValue || (revoked.Value ? c.RevokedAt != null : c.RevokedAt == null))
+            .Where(c => !from.HasValue || c.GrantedAt >= from.Value)
+            .Where(c => !to.HasValue || c.GrantedAt <= to.Value)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
     public async Task AddAsync(PersonConsent consent, CancellationToken cancellationToken)
         => await _context.PersonConsents.AddAsync(consent, cancellationToken);
 

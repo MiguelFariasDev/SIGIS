@@ -3,8 +3,11 @@ namespace Sigis.Application.UseCases.Attendances;
 /// <summary>Resumo de um atendimento registrado, para exibição.</summary>
 /// <param name="Id">Identificador do atendimento.</param>
 /// <param name="PersonId">Identificador da pessoa atendida.</param>
+/// <param name="PersonName">Nome da pessoa atendida.</param>
 /// <param name="UnitId">Identificador da unidade de serviço.</param>
+/// <param name="UnitAcronym">Sigla da unidade de serviço.</param>
 /// <param name="ProfessionalId">Identificador do profissional responsável.</param>
+/// <param name="ProfessionalName">Nome do profissional responsável.</param>
 /// <param name="DateTime">Data e hora (UTC) do atendimento.</param>
 /// <param name="SessionType">Tipo de sessão/anamnese.</param>
 /// <param name="SessionNumber">Número sequencial da sessão, para o mesmo tipo e pessoa.</param>
@@ -16,8 +19,11 @@ namespace Sigis.Application.UseCases.Attendances;
 public sealed record AttendanceResponse(
     Guid Id,
     Guid PersonId,
+    string PersonName,
     Guid UnitId,
+    string UnitAcronym,
     Guid ProfessionalId,
+    string ProfessionalName,
     DateTime DateTime,
     string SessionType,
     int SessionNumber,

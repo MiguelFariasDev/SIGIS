@@ -24,6 +24,12 @@ public interface IReferralRepository
     Task<IReadOnlyList<Referral>> GetActiveByDestinationUnitAsync(
         Guid destinationUnitId, CancellationToken cancellationToken);
 
+    /// <summary>Lista todos os encaminhamentos (qualquer situação) enviados por uma unidade de origem.</summary>
+    /// <param name="originUnitId">Identificador da unidade de origem.</param>
+    /// <param name="cancellationToken">Token de cancelamento da operação.</param>
+    /// <returns>Lista de encaminhamentos enviados pela unidade, mais recentes primeiro, podendo ser vazia.</returns>
+    Task<IReadOnlyList<Referral>> GetByOriginUnitAsync(Guid originUnitId, CancellationToken cancellationToken);
+
     /// <summary>Adiciona um novo encaminhamento ao repositório.</summary>
     /// <param name="referral">Encaminhamento a ser adicionado.</param>
     /// <param name="cancellationToken">Token de cancelamento da operação.</param>

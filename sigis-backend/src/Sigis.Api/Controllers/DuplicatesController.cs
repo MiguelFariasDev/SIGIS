@@ -38,6 +38,40 @@ public sealed class DuplicatesController : ApiControllerBase
         return ToHttpResult(result);
     }
 
+    /// <summary>Consulta um alerta de duplicidade pelo identificador.</summary>
+    /// <param name="id">Identificador do alerta.</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+    /// <returns>200 com o alerta, ou 404 quando não existir.</returns>
+    [HttpGet("{id:guid}")]
+    [Authorize(Policy = "RequireCoordinator")]
+    [ProducesResponseType(typeof(DuplicateAlertResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetDuplicateByIdQuery(id), cancellationToken);
+        return ToHttpResult(result);
+    }
+
+    /// <summary>
+    /// Resolve um alerta de duplicidade pendente — mesclando os cadastros
+    /// (<c>MESCLAR</c>) ou marcando como falso positivo (<c>FALSO_POSITIVO</c>).
+    /// </summary>
+    /// <param name="id">Identificador do alerta de duplicidade.</param>
+    /// <param name="request">Ação escolhida pelo coordenador.</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+    /// <returns>200 com o alerta resolvido, 400 quando a ação for inválida, 404 quando não existir, ou 409 quando já resolvido.</returns>
+    [HttpPost("{id:guid}/resolver")]
+    [Authorize(Policy = "RequireCoordinator")]
+    [ProducesResponseType(typeof(DuplicateAlertResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Resolve(Guid id, [FromBody] ResolveDuplicateRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ResolveDuplicateCommand(id, request.Acao), cancellationToken);
+        return ToHttpResult(result);
+    }
+
     /// <summary>
     /// Marca um alerta de duplicidade como falso positivo — os dois
     /// cadastros são de pessoas diferentes e permanecem separados.

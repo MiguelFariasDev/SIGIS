@@ -42,6 +42,13 @@ public sealed class ReferralRepository : IReferralRepository
             .ToListAsync(cancellationToken);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Referral>> GetByOriginUnitAsync(Guid originUnitId, CancellationToken cancellationToken)
+        => await _context.Referrals
+            .Where(r => r.OriginUnitId == originUnitId)
+            .OrderByDescending(r => r.ReferralDate)
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
     public async Task AddAsync(Referral referral, CancellationToken cancellationToken)
         => await _context.Referrals.AddAsync(referral, cancellationToken);
 

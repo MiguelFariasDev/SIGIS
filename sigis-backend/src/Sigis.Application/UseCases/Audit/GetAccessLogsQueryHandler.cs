@@ -9,12 +9,21 @@ public sealed class GetAccessLogsQueryHandler
     : IRequestHandler<GetAccessLogsQuery, Result<IReadOnlyList<AccessLogResponse>>>
 {
     private readonly IAccessLogRepository _accessLogRepository;
+    private readonly IPersonRepository _personRepository;
+    private readonly IProfessionalRepository _professionalRepository;
 
     /// <summary>Cria o handler de <see cref="GetAccessLogsQuery"/>.</summary>
     /// <param name="accessLogRepository">Repositório de registros de auditoria de acesso.</param>
-    public GetAccessLogsQueryHandler(IAccessLogRepository accessLogRepository)
+    /// <param name="personRepository">Repositório de pessoas, para resolver o nome exibido.</param>
+    /// <param name="professionalRepository">Repositório de profissionais, para resolver o nome exibido.</param>
+    public GetAccessLogsQueryHandler(
+        IAccessLogRepository accessLogRepository,
+        IPersonRepository personRepository,
+        IProfessionalRepository professionalRepository)
     {
         _accessLogRepository = accessLogRepository;
+        _personRepository = personRepository;
+        _professionalRepository = professionalRepository;
     }
 
     /// <inheritdoc />
@@ -24,11 +33,9 @@ public sealed class GetAccessLogsQueryHandler
         var logs = await _accessLogRepository.SearchAsync(
             request.PersonId, request.ProfessionalId, request.From, request.To, cancellationToken);
 
-        var response = logs
-            .Select(l => new AccessLogResponse(
-                l.Id, l.PersonId, l.ProfessionalId, l.Action, l.LegalBasis, l.Justification, l.DateTime,
-                l.IsCrossUnit()))
-            .ToList();
+        var response = new List<AccessLogResponse>(logs.Count);
+        foreach (var log in logs)
+            response.Add(await AccessLogResponseMapper.MapAsync(log, _personRepository, _professionalRepository, cancellationToken));
 
         return Result<IReadOnlyList<AccessLogResponse>>.Success(response);
     }

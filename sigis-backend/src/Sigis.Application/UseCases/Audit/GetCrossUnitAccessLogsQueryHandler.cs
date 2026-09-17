@@ -9,12 +9,21 @@ public sealed class GetCrossUnitAccessLogsQueryHandler
     : IRequestHandler<GetCrossUnitAccessLogsQuery, Result<IReadOnlyList<CrossAccessResponse>>>
 {
     private readonly IAccessLogRepository _accessLogRepository;
+    private readonly IPersonRepository _personRepository;
+    private readonly IProfessionalRepository _professionalRepository;
 
     /// <summary>Cria o handler de <see cref="GetCrossUnitAccessLogsQuery"/>.</summary>
     /// <param name="accessLogRepository">Repositório de registros de auditoria de acesso.</param>
-    public GetCrossUnitAccessLogsQueryHandler(IAccessLogRepository accessLogRepository)
+    /// <param name="personRepository">Repositório de pessoas, para resolver o nome exibido.</param>
+    /// <param name="professionalRepository">Repositório de profissionais, para resolver o nome exibido.</param>
+    public GetCrossUnitAccessLogsQueryHandler(
+        IAccessLogRepository accessLogRepository,
+        IPersonRepository personRepository,
+        IProfessionalRepository professionalRepository)
     {
         _accessLogRepository = accessLogRepository;
+        _personRepository = personRepository;
+        _professionalRepository = professionalRepository;
     }
 
     /// <inheritdoc />
@@ -23,10 +32,9 @@ public sealed class GetCrossUnitAccessLogsQueryHandler
     {
         var logs = await _accessLogRepository.GetCrossUnitAsync(cancellationToken);
 
-        var response = logs
-            .Select(l => new CrossAccessResponse(
-                l.Id, l.PersonId, l.ProfessionalId, l.Action, l.LegalBasis, l.Justification, l.DateTime))
-            .ToList();
+        var response = new List<CrossAccessResponse>(logs.Count);
+        foreach (var log in logs)
+            response.Add(await AccessLogResponseMapper.MapCrossAsync(log, _personRepository, _professionalRepository, cancellationToken));
 
         return Result<IReadOnlyList<CrossAccessResponse>>.Success(response);
     }

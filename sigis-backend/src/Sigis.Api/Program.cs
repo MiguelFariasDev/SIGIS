@@ -130,7 +130,8 @@ if (app.Environment.IsDevelopment())
     using var seedScope = app.Services.CreateScope();
     var dbContext = seedScope.ServiceProvider.GetRequiredService<SigisDbContext>();
     var passwordHasher = seedScope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-    await DevelopmentSeeder.SeedAsync(dbContext, passwordHasher, CancellationToken.None);
+    var seedLogger = seedScope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DevelopmentSeeder");
+    await DevelopmentSeeder.SeedAsync(dbContext, passwordHasher, seedLogger, CancellationToken.None);
 }
 
 app.UseSerilogRequestLogging();

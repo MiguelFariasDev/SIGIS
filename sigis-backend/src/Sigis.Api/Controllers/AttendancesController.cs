@@ -38,6 +38,31 @@ public sealed class AttendancesController : ApiControllerBase
         return ToCreatedResult(result);
     }
 
+    /// <summary>Consulta um atendimento pelo identificador.</summary>
+    /// <param name="id">Identificador do atendimento.</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+    /// <returns>200 com o atendimento, ou 404 quando não existir.</returns>
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(AttendanceResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetAttendanceByIdQuery(id), cancellationToken);
+        return ToHttpResult(result);
+    }
+
+    /// <summary>Lista o histórico de atendimentos de uma pessoa em todas as unidades da rede.</summary>
+    /// <param name="pessoaId">Identificador da pessoa.</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+    /// <returns>200 com a lista de atendimentos da pessoa.</returns>
+    [HttpGet("pessoa/{pessoaId:guid}")]
+    [ProducesResponseType(typeof(List<AttendanceResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetByPerson(Guid pessoaId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetAttendancesByPersonQuery(pessoaId), cancellationToken);
+        return ToHttpResult(result);
+    }
+
     /// <summary>Registra o comparecimento ou a falta de uma pessoa a um atendimento agendado.</summary>
     /// <param name="id">Identificador do atendimento.</param>
     /// <param name="request">Situação de comparecimento e queixa principal opcional.</param>

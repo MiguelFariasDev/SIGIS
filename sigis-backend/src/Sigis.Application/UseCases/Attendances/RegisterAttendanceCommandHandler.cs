@@ -16,6 +16,7 @@ public sealed class RegisterAttendanceCommandHandler : IRequestHandler<RegisterA
     private readonly IAttendanceRepository _attendanceRepository;
     private readonly IPersonRepository _personRepository;
     private readonly IServiceUnitRepository _serviceUnitRepository;
+    private readonly IProfessionalRepository _professionalRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -24,12 +25,14 @@ public sealed class RegisterAttendanceCommandHandler : IRequestHandler<RegisterA
         IAttendanceRepository attendanceRepository,
         IPersonRepository personRepository,
         IServiceUnitRepository serviceUnitRepository,
+        IProfessionalRepository professionalRepository,
         IDateTimeProvider dateTimeProvider,
         IUnitOfWork unitOfWork)
     {
         _attendanceRepository = attendanceRepository;
         _personRepository = personRepository;
         _serviceUnitRepository = serviceUnitRepository;
+        _professionalRepository = professionalRepository;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
     }
@@ -70,9 +73,7 @@ public sealed class RegisterAttendanceCommandHandler : IRequestHandler<RegisterA
         await _attendanceRepository.AddAsync(attendance, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<AttendanceResponse>.Success(new AttendanceResponse(
-            attendance.Id, attendance.PersonId, attendance.UnitId, attendance.ProfessionalId, attendance.DateTime,
-            attendance.SessionType.ToString(), attendance.SessionNumber, attendance.Status.ToString(),
-            attendance.FormData, attendance.TriagedByProfessionalId, attendance.MainComplaint, attendance.CreatedAt));
+        return Result<AttendanceResponse>.Success(await AttendanceResponseMapper.MapAsync(
+            attendance, _personRepository, _serviceUnitRepository, _professionalRepository, cancellationToken));
     }
 }

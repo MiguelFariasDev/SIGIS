@@ -49,6 +49,30 @@ public sealed class ReferralsController : ApiControllerBase
         return ToHttpResult(result);
     }
 
+    /// <summary>Lista todos os encaminhamentos enviados pela unidade do profissional autenticado.</summary>
+    /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+    /// <returns>200 com a lista de encaminhamentos enviados.</returns>
+    [HttpGet("enviados")]
+    [ProducesResponseType(typeof(List<ReferralResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetSent(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetSentReferralsQuery(), cancellationToken);
+        return ToHttpResult(result);
+    }
+
+    /// <summary>Lista o histórico de encaminhamentos de uma pessoa em todas as unidades da rede.</summary>
+    /// <param name="pessoaId">Identificador da pessoa.</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+    /// <returns>200 com a lista de encaminhamentos da pessoa.</returns>
+    [HttpGet("pessoa/{pessoaId:guid}")]
+    [ProducesResponseType(typeof(List<ReferralResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetByPerson(Guid pessoaId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetReferralsByPersonQuery(pessoaId), cancellationToken);
+        return ToHttpResult(result);
+    }
+
     /// <summary>Aceita um encaminhamento pendente.</summary>
     /// <param name="id">Identificador do encaminhamento.</param>
     /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
