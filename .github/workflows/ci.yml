@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore sigis-backend/Sigis.sln
+      - name: Build
+        run: dotnet build sigis-backend/Sigis.sln --no-restore
+      - name: Test
+        run: dotnet test sigis-backend/Sigis.sln --no-build
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install
+        working-directory: sigis-frontend
+        run: npm ci
+      - name: Build
+        working-directory: sigis-frontend
+        run: npm run build
+      - name: Test
+        working-directory: sigis-frontend
+        run: npm test --if-present
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+      - name: Pub get
+        working-directory: sigis-mobile
+        run: flutter pub get
+      - name: Analyze
+        working-directory: sigis-mobile
+        run: flutter analyze
+      - name: Test
+        working-directory: sigis-mobile
+        run: flutter test --if-present

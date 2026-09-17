@@ -1,0 +1,81 @@
+services:
+  sigis-db:
+    image: postgres:16-alpine
+    container_name: sigis-db
+    environment:
+      POSTGRES_DB: sigis_db
+      POSTGRES_USER: sigis
+      POSTGRES_PASSWORD: sigis_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - sigis-db-data:/var/lib/postgresql/data
+      - ./docker/init-extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sigis -d sigis_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sigis-net
+
+  sigis-api:
+    build:
+      context: ./sigis-backend
+      dockerfile: Dockerfile
+    container_name: sigis-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__SigisDb: "Host=sigis-db;Port=5432;Database=sigis_db;Username=sigis;Password=sigis_dev"
+    ports:
+      - "5000:5000"
+    depends_on:
+      sigis-db:
+        condition: service_healthy
+    networks:
+      - sigis-net
+
+  sigis-front:
+    build:
+      context: ./sigis-frontend
+      dockerfile: Dockerfile
+    container_name: sigis-front
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:5000
+    depends_on:
+      - sigis-api
+    networks:
+      - sigis-net
+
+  # Serviços opcionais — só descomentar se sobrar tempo e houver necessidade real.
+  #
+  # sigis-redis:
+  #   image: redis:7-alpine
+  #   container_name: sigis-redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - sigis-net
+  #
+  # sigis-minio:
+  #   image: minio/minio:latest
+  #   container_name: sigis-minio
+  #   command: server /data --console-address ":9001"
+  #   ports:
+  #     - "9000:9000"
+  #     - "9001:9001"
+  #   environment:
+  #     MINIO_ROOT_USER: sigis
+  #     MINIO_ROOT_PASSWORD: sigis_dev
+  #   networks:
+  #     - sigis-net
+
+networks:
+  sigis-net:
+    driver: bridge
+
+volumes:
+  sigis-db-data:

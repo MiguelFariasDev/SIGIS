@@ -1,0 +1,137 @@
+# ==== .NET ====
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+artifacts/
+*.pdb
+*.cache
+project.lock.json
+project.fragment.lock.json
+TestResults/
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# ==== Node / Vite / React ====
+node_modules/
+dist/
+dist-ssr/
+.vite/
+.turbo/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# ==== Flutter / Dart ====
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+sigis-mobile/android/local.properties
+sigis-mobile/**/generated_plugin_registrant.dart
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# ==== IDEs ====
+.vs/
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*~
+
+# ==== Docker Compose (volumes locais, overrides) ====
+docker-compose.override.yml
+docker/pgdata/
+
+# ==== SO ====
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =====================================================================
+# SEGREDOS / CHAVES / TOKENS — NUNCA COMMITAR
+# =====================================================================
+# Qualquer arquivo .env real (mantemos só os .env.example versionados)
+.env
+.env.*
+!.env.example
+!*/.env.example
+
+# appsettings com segredos locais (o appsettings.json/appsettings.Development.json
+# de scaffold, sem segredo real, continuam versionados)
+appsettings.Local.json
+appsettings.*.Local.json
+appsettings.Secrets.json
+secrets.json
+**/secrets/*.json
+*.secrets.json
+
+# User Secrets do .NET (caso alguém aponte para pasta local do projeto)
+**/UserSecrets.json
+
+# Chaves, certificados e assinaturas
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+*.cer
+*.der
+*.jks
+*.keystore
+key.properties
+sigis-mobile/android/key.properties
+sigis-mobile/android/app/*.jks
+sigis-mobile/android/app/*.keystore
+sigis-mobile/ios/**/*.mobileprovision
+sigis-mobile/ios/**/*.p12
+
+# Credenciais de nuvem / integrações externas
+credentials.json
+client_secret*.json
+google-services.json
+GoogleService-Info.plist
+firebase-debug.log
+.aws/
+.azure/
+.gcloud/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+
+# SSH / tokens de acesso pessoal
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+*.ppk
+.netrc
+.npmrc.local
+.pypirc
+
+# Dumps de banco que podem conter dados sensíveis de pacientes (LGPD)
+*.sql.gz
+*.dump
+sigis-backend/**/*.back
