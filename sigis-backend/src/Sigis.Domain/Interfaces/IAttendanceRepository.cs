@@ -37,8 +37,30 @@ public interface IAttendanceRepository
     /// <param name="cancellationToken">Token de cancelamento da operação.</param>
     Task AddAsync(Attendance attendance, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Busca atendimentos filtrados opcionalmente por unidade e período —
+    /// usado pelo painel de indicadores.
+    /// </summary>
+    /// <param name="unitId">Identificador da unidade de serviço, opcional.</param>
+    /// <param name="from">Início do período (UTC, inclusive), opcional.</param>
+    /// <param name="to">Fim do período (UTC, inclusive), opcional.</param>
+    /// <param name="cancellationToken">Token de cancelamento da operação.</param>
+    /// <returns>Lista de atendimentos que atendem aos filtros informados, podendo ser vazia.</returns>
+    Task<IReadOnlyList<Attendance>> SearchAsync(
+        Guid? unitId, DateTime? from, DateTime? to, CancellationToken cancellationToken);
+
     /// <summary>Atualiza os dados de um atendimento já existente no repositório.</summary>
     /// <param name="attendance">Atendimento com os dados atualizados.</param>
     /// <param name="cancellationToken">Token de cancelamento da operação.</param>
     Task UpdateAsync(Attendance attendance, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Reatribui todos os atendimentos de uma pessoa para outra, em massa —
+    /// usado na mesclagem de cadastros duplicados (RN02).
+    /// </summary>
+    /// <param name="fromPersonId">Identificador do cadastro de origem.</param>
+    /// <param name="toPersonId">Identificador do cadastro de destino.</param>
+    /// <param name="cancellationToken">Token de cancelamento da operação.</param>
+    /// <returns>Quantidade de atendimentos reatribuídos.</returns>
+    Task<int> ReassignPersonAsync(Guid fromPersonId, Guid toPersonId, CancellationToken cancellationToken);
 }

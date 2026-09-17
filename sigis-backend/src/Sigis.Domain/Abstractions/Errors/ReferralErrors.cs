@@ -13,8 +13,8 @@ public static class ReferralErrors
     public static readonly Error MotivoMuitoCurto = new("REFERRAL_003", "Motivo deve ter ao menos 10 caracteres.");
 
     /// <summary>Transição de status inválida para encaminhamento.</summary>
-    public static readonly Error TransicaoInvalida = new("REFERRAL_004", "Transição de status inválida para encaminhamento.");
+    public static readonly Error TransicaoInvalida = new("REFERRAL_004", "Transição de status inválida para encaminhamento.", ErrorType.Conflict);
 
     /// <summary>Encaminhamento precisa ser aceito antes de concluir.</summary>
-    public static readonly Error NaoAceito = new("REFERRAL_005", "Encaminhamento precisa ser aceito antes de concluir.");
+    public static readonly Error NaoAceito = new("REFERRAL_005", "Encaminhamento precisa ser aceito antes de concluir.", ErrorType.Conflict);
 }

@@ -6,6 +6,12 @@ namespace Sigis.Domain.Interfaces;
 /// <summary>Repositório de persistência para a entidade <see cref="PersonConsent"/>.</summary>
 public interface IPersonConsentRepository
 {
+    /// <summary>Busca um consentimento pelo identificador.</summary>
+    /// <param name="id">Identificador do consentimento.</param>
+    /// <param name="cancellationToken">Token de cancelamento da operação.</param>
+    /// <returns>O consentimento encontrado, ou <see langword="null"/> quando não existir.</returns>
+    Task<PersonConsent?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+
     /// <summary>Lista todos os consentimentos (ativos e revogados) de uma pessoa.</summary>
     /// <param name="personId">Identificador da pessoa.</param>
     /// <param name="cancellationToken">Token de cancelamento da operação.</param>

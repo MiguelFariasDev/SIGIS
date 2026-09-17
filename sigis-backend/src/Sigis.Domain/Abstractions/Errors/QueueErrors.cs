@@ -4,13 +4,13 @@ namespace Sigis.Domain.Abstractions.Errors;
 public static class QueueErrors
 {
     /// <summary>Já existe fila ativa para esta pessoa nesta unidade.</summary>
-    public static readonly Error FilaJaAtiva = new("QUEUE_001", "Já existe fila ativa para esta pessoa nesta unidade.");
+    public static readonly Error FilaJaAtiva = new("QUEUE_001", "Já existe fila ativa para esta pessoa nesta unidade.", ErrorType.Conflict);
 
     /// <summary>Fila não está ativa.</summary>
-    public static readonly Error FilaNaoAtiva = new("QUEUE_002", "Fila não está ativa.");
+    public static readonly Error FilaNaoAtiva = new("QUEUE_002", "Fila não está ativa.", ErrorType.Conflict);
 
     /// <summary>Transição de status inválida para fila.</summary>
-    public static readonly Error TransicaoInvalida = new("QUEUE_003", "Transição de status inválida para fila.");
+    public static readonly Error TransicaoInvalida = new("QUEUE_003", "Transição de status inválida para fila.", ErrorType.Conflict);
 
     /// <summary>Justificativa é obrigatória para reclassificação.</summary>
     public static readonly Error JustificativaObrigatoria = new("QUEUE_004", "Justificativa é obrigatória para reclassificação.");

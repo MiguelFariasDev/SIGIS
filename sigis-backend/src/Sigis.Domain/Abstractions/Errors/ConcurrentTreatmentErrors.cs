@@ -7,7 +7,7 @@ public static class ConcurrentTreatmentErrors
     public static readonly Error HorarioInicioAposFim = new("CONCURRENT_001", "Horário de início deve ser anterior ao horário de fim.");
 
     /// <summary>Já existe tratamento neste horário.</summary>
-    public static readonly Error SobreposicaoDeHorario = new("CONCURRENT_002", "Já existe tratamento neste horário.");
+    public static readonly Error SobreposicaoDeHorario = new("CONCURRENT_002", "Já existe tratamento neste horário.", ErrorType.Conflict);
 
     /// <summary>Especialidade é obrigatória.</summary>
     public static readonly Error EspecialidadeObrigatoria = new("CONCURRENT_003", "Especialidade é obrigatória.");

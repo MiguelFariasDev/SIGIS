@@ -10,7 +10,7 @@ public static class SchoolHistoryErrors
     public static readonly Error SerieObrigatoria = new("SCHOOL_002", "Série é obrigatória.");
 
     /// <summary>Já existe uma escola ativa para este aluno.</summary>
-    public static readonly Error EscolaAtivaJaExiste = new("SCHOOL_003", "Já existe uma escola ativa para este aluno.");
+    public static readonly Error EscolaAtivaJaExiste = new("SCHOOL_003", "Já existe uma escola ativa para este aluno.", ErrorType.Conflict);
 
     /// <summary>Ano letivo inválido (deve estar entre 1900 e o ano atual).</summary>
     public static readonly Error AnoLetivoInvalido = new("SCHOOL_004", "Ano letivo inválido (deve estar entre 1900 e o ano atual).");

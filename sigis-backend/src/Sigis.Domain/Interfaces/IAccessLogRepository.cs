@@ -21,4 +21,22 @@ public interface IAccessLogRepository
     /// <param name="accessLog">Registro de acesso a ser adicionado.</param>
     /// <param name="cancellationToken">Token de cancelamento da operação.</param>
     Task AddAsync(AccessLog accessLog, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Busca registros de auditoria de acesso filtrados por pessoa,
+    /// profissional e/ou período — usado pela controller de auditoria (RF13).
+    /// </summary>
+    /// <param name="personId">Identificador da pessoa, opcional.</param>
+    /// <param name="professionalId">Identificador do profissional, opcional.</param>
+    /// <param name="from">Início do período (UTC, inclusive), opcional.</param>
+    /// <param name="to">Fim do período (UTC, inclusive), opcional.</param>
+    /// <param name="cancellationToken">Token de cancelamento da operação.</param>
+    /// <returns>Lista de registros de acesso que atendem aos filtros informados, podendo ser vazia.</returns>
+    Task<IReadOnlyList<AccessLog>> SearchAsync(
+        Guid? personId, Guid? professionalId, DateTime? from, DateTime? to, CancellationToken cancellationToken);
+
+    /// <summary>Lista todos os registros de auditoria classificados como acesso entre unidades (RNF02, RF13).</summary>
+    /// <param name="cancellationToken">Token de cancelamento da operação.</param>
+    /// <returns>Lista de registros de acesso cross-unidade, podendo ser vazia.</returns>
+    Task<IReadOnlyList<AccessLog>> GetCrossUnitAsync(CancellationToken cancellationToken);
 }

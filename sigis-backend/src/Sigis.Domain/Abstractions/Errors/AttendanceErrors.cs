@@ -10,8 +10,8 @@ public static class AttendanceErrors
     public static readonly Error DadosFormularioInvalidos = new("ATTENDANCE_002", "Dados do formulário inválidos.");
 
     /// <summary>Comparecimento já registrado.</summary>
-    public static readonly Error ComparecimentoJaRegistrado = new("ATTENDANCE_003", "Comparecimento já registrado.");
+    public static readonly Error ComparecimentoJaRegistrado = new("ATTENDANCE_003", "Comparecimento já registrado.", ErrorType.Conflict);
 
     /// <summary>Não é possível alterar após comparecimento registrado.</summary>
-    public static readonly Error NaoPodeAlterarAposComparecimento = new("ATTENDANCE_004", "Não é possível alterar após comparecimento registrado.");
+    public static readonly Error NaoPodeAlterarAposComparecimento = new("ATTENDANCE_004", "Não é possível alterar após comparecimento registrado.", ErrorType.Conflict);
 }

@@ -13,5 +13,5 @@ public static class DuplicateErrors
     public static readonly Error MesmaPessoa = new("DUPLICATE_003", "Não é possível criar alerta de duplicidade para a mesma pessoa.");
 
     /// <summary>Alerta de duplicidade já foi resolvido.</summary>
-    public static readonly Error AlertaJaResolvido = new("DUPLICATE_004", "Alerta de duplicidade já foi resolvido.");
+    public static readonly Error AlertaJaResolvido = new("DUPLICATE_004", "Alerta de duplicidade já foi resolvido.", ErrorType.Conflict);
 }

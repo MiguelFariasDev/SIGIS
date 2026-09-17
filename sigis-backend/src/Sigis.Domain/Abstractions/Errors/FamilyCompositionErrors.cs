@@ -4,7 +4,7 @@ namespace Sigis.Domain.Abstractions.Errors;
 public static class FamilyCompositionErrors
 {
     /// <summary>Composição familiar já cadastrada para esta pessoa.</summary>
-    public static readonly Error JaCadastrada = new("FAMILY_001", "Composição familiar já cadastrada para esta pessoa.");
+    public static readonly Error JaCadastrada = new("FAMILY_001", "Composição familiar já cadastrada para esta pessoa.", ErrorType.Conflict);
 
     /// <summary>Número de abortos não pode ser maior que número de gestações.</summary>
     public static readonly Error AbortosMaiorQueGestacoes = new("FAMILY_002", "Número de abortos não pode ser maior que número de gestações.");

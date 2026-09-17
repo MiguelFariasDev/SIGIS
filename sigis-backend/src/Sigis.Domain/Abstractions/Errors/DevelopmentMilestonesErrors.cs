@@ -4,7 +4,7 @@ namespace Sigis.Domain.Abstractions.Errors;
 public static class DevelopmentMilestonesErrors
 {
     /// <summary>Marcos de desenvolvimento já cadastrados para esta pessoa.</summary>
-    public static readonly Error JaCadastrados = new("DEV_001", "Marcos de desenvolvimento já cadastrados para esta pessoa.");
+    public static readonly Error JaCadastrados = new("DEV_001", "Marcos de desenvolvimento já cadastrados para esta pessoa.", ErrorType.Conflict);
 
     /// <summary>Idade inválida (deve estar entre 0 e 120 meses).</summary>
     public static readonly Error IdadeInvalida = new("DEV_002", "Idade inválida (deve estar entre 0 e 120 meses).");

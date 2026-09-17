@@ -4,10 +4,10 @@ namespace Sigis.Domain.Abstractions.Errors;
 public static class ClinicalProfileErrors
 {
     /// <summary>Perfil clínico já cadastrado para esta pessoa.</summary>
-    public static readonly Error JaCadastrado = new("CLINICAL_001", "Perfil clínico já cadastrado para esta pessoa.");
+    public static readonly Error JaCadastrado = new("CLINICAL_001", "Perfil clínico já cadastrado para esta pessoa.", ErrorType.Conflict);
 
     /// <summary>Número do prontuário já existe nesta unidade.</summary>
-    public static readonly Error ProntuarioDuplicado = new("CLINICAL_002", "Número do prontuário já existe nesta unidade.");
+    public static readonly Error ProntuarioDuplicado = new("CLINICAL_002", "Número do prontuário já existe nesta unidade.", ErrorType.Conflict);
 
     /// <summary>Hipótese diagnóstica é obrigatória para pacientes NASF.</summary>
     public static readonly Error HipoteseDiagnosticaObrigatoria = new("CLINICAL_003", "Hipótese diagnóstica é obrigatória para pacientes NASF.");

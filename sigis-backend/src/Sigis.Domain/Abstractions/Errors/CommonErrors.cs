@@ -4,11 +4,11 @@ namespace Sigis.Domain.Abstractions.Errors;
 public static class CommonErrors
 {
     /// <summary>Erro interno inesperado.</summary>
-    public static readonly Error InternalError = new("COMMON_001", "Erro interno inesperado.");
+    public static readonly Error InternalError = new("COMMON_001", "Erro interno inesperado.", ErrorType.Internal);
 
     /// <summary>Recurso não encontrado.</summary>
-    public static readonly Error NotFound = new("COMMON_002", "Recurso não encontrado.");
+    public static readonly Error NotFound = new("COMMON_002", "Recurso não encontrado.", ErrorType.NotFound);
 
     /// <summary>Acesso não autorizado.</summary>
-    public static readonly Error Unauthorized = new("COMMON_003", "Acesso não autorizado.");
+    public static readonly Error Unauthorized = new("COMMON_003", "Acesso não autorizado.", ErrorType.Unauthorized);
 }

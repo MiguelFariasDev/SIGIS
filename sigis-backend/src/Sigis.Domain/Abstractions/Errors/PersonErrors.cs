@@ -48,19 +48,19 @@ public static class PersonErrors
     public static readonly Error EnderecoInvalido = new("PERSON_013", "Endereço inválido.");
 
     /// <summary>Pessoa não encontrada.</summary>
-    public static readonly Error PessoaNaoEncontrada = new("PERSON_014", "Pessoa não encontrada.");
+    public static readonly Error PessoaNaoEncontrada = new("PERSON_014", "Pessoa não encontrada.", ErrorType.NotFound);
 
     /// <summary>Já existe pessoa com este CNS.</summary>
-    public static readonly Error CnsDuplicado = new("PERSON_015", "Já existe pessoa com este CNS.");
+    public static readonly Error CnsDuplicado = new("PERSON_015", "Já existe pessoa com este CNS.", ErrorType.Conflict);
 
     /// <summary>Já existe pessoa com este CPF.</summary>
-    public static readonly Error CpfDuplicado = new("PERSON_016", "Já existe pessoa com este CPF.");
+    public static readonly Error CpfDuplicado = new("PERSON_016", "Já existe pessoa com este CPF.", ErrorType.Conflict);
 
     /// <summary>Relacionamento do responsável com a pessoa é obrigatório.</summary>
     public static readonly Error RelacionamentoObrigatorio = new("PERSON_017", "Relacionamento do responsável com a pessoa é obrigatório.");
 
     /// <summary>Responsável não encontrado.</summary>
-    public static readonly Error ResponsavelNaoEncontrado = new("PERSON_018", "Responsável não encontrado.");
+    public static readonly Error ResponsavelNaoEncontrado = new("PERSON_018", "Responsável não encontrado.", ErrorType.NotFound);
 
     /// <summary>Nome da unidade de serviço é obrigatório.</summary>
     public static readonly Error NomeUnidadeObrigatorio = new("PERSON_019", "Nome da unidade de serviço é obrigatório.");
@@ -73,4 +73,7 @@ public static class PersonErrors
 
     /// <summary>Unidade do profissional é obrigatória.</summary>
     public static readonly Error UnidadeProfissionalObrigatoria = new("PERSON_022", "Unidade do profissional é obrigatória.");
+
+    /// <summary>Origem e destino da mesclagem não podem ser a mesma pessoa.</summary>
+    public static readonly Error MesclagemMesmaPessoa = new("PERSON_023", "Origem e destino da mesclagem não podem ser a mesma pessoa.");
 }
